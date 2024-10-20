@@ -20,12 +20,14 @@ struct SonarImageMsgInterface
     : public sonar_image_proc::AbstractSonarInterface {
   explicit SonarImageMsgInterface(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &ping)
-      : _ping(ping), do_log_scale_(false) {
+      : _ping(boost::make_shared<marine_acoustic_msgs::ProjectedSonarImage>(*ping)), do_log_scale_(false) {
+    // Set tx_beamwidths[0] to 20 degrees in radians
+    if (!_ping->ping_info.tx_beamwidths.empty()) {
+      _ping->ping_info.tx_beamwidths[0] = 20.0 * M_PI / 180.0;
+    }
+
     // Vertical field of view is determined by comparing
     // z / sqrt(x^2 + y^2) to tan(elevation_beamwidth/2)
-    if (!ping->ping_info.tx_beamwidths.empty()) {
-      ping->ping_info.tx_beamwidths[0] = 20.0 * M_PI / 180.0;
-    }
     _verticalTanSquared =
         // NOTE(lindzey): The old message assumed a constant elevation
         // beamwidth;
@@ -34,9 +36,9 @@ struct SonarImageMsgInterface
         // TODO(lindzey): Look into whether averaging would be better, or if we
         //     should create an array of verticalTanSquared.
         // TODO(lindzey): Handle empty-array case.
-        std::pow(std::tan(ping->ping_info.tx_beamwidths[0] / 2.0), 2);
+        std::pow(std::tan(_ping->ping_info.tx_beamwidths[0] / 2.0), 2);
 
-    for (const auto pt : ping->beam_directions) {
+    for (const auto pt : _ping->beam_directions) {
       auto az = atan2(-1 * pt.y, pt.z);
       _ping_azimuths.push_back(az);
     }
@@ -237,4 +239,10 @@ struct SonarImageMsgInterface
   float min_db_, max_db_, range_db_;
 };
 
-}  // namespace sonar_image_proc
+
+private:
+  marine_acoustic_msgs::ProjectedSonarImage::Ptr _ping;
+  bool do_log_scale_;
+  double _verticalTanSquared;
+  std::vector<float> _ping_azimuths;
+}; // namespace sonar_image_proc
