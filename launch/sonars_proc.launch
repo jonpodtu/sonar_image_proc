@@ -1,0 +1,55 @@
+<!-- Launches both oculus and blueview draw_sonar nodes -->
+<launch>
+  <!-- Nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen"/>
+
+  <!-- Group for oculus namespace -->
+  <group ns="oculus">
+    <!-- Draw sonar nodelet for oculus -->
+    <node pkg="nodelet" type="nodelet" name="draw_sonar_oculus"
+          args="load sonar_image_proc/draw_sonar /nodelet_manager"
+          output="screen">
+        <!-- Remap input topic -->
+        <remap from="sonar_image" to="/oculus_sonar_message"/>
+        
+        <!-- Remap output topics -->
+        <remap from="drawn_sonar" to="/oculus/drawn_sonar"/>
+        <remap from="drawn_sonar_rect" to="/oculus/drawn_sonar_rect"/>
+        <remap from="drawn_sonar_osd" to="/oculus/drawn_sonar_osd"/>
+        <remap from="old_drawn_sonar" to="/oculus/old_drawn_sonar"/>
+        <remap from="sonar_image_proc_timing" to="/oculus/sonar_image_proc_timing"/>
+        <remap from="histogram" to="/oculus/histogram"/>
+
+        <!-- Parameters -->
+        <param name="publish_histogram" value="true"/>
+    </node>
+
+    <!-- Histogram drawer node for oculus -->
+    <node pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer_oculus" output="screen"/>
+  </group>
+
+  <!-- Group for blueview namespace -->
+  <group ns="blueview">
+    <!-- Draw sonar nodelet for blueview -->
+    <node pkg="nodelet" type="nodelet" name="draw_sonar_blueview"
+          args="load sonar_image_proc/draw_sonar /nodelet_manager"
+          output="screen">
+        <!-- Remap input topic -->
+        <remap from="sonar_image" to="blueview_message_polar"/>
+        
+        <!-- Remap output topics -->
+        <remap from="drawn_sonar" to="/blueview/drawn_sonar"/>
+        <remap from="drawn_sonar_rect" to="/blueview/drawn_sonar_rect"/>
+        <remap from="drawn_sonar_osd" to="/blueview/drawn_sonar_osd"/>
+        <remap from="old_drawn_sonar" to="/blueview/old_drawn_sonar"/>
+        <remap from="sonar_image_proc_timing" to="/blueview/sonar_image_proc_timing"/>
+        <remap from="histogram" to="/blueview/histogram"/>
+
+        <!-- Parameters -->
+        <param name="publish_histogram" value="true"/>
+    </node>
+
+    <!-- Histogram drawer node for blueview -->
+    <node pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer_blueview" output="screen"/>
+  </group>
+</launch>

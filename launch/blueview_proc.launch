@@ -6,7 +6,7 @@
   <!-- Group for blueview namespace -->
   <group ns="blueview">
     <!-- Draw sonar nodelet -->
-    <node pkg="nodelet" type="nodelet" name="draw_sonar"
+    <node pkg="nodelet" type="nodelet" name="draw_sonar_blueview"
           args="load sonar_image_proc/draw_sonar /nodelet_manager"
           output="screen">
         <!-- Remap input topic -->
