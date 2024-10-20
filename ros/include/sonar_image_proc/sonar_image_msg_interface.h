@@ -23,6 +23,9 @@ struct SonarImageMsgInterface
       : _ping(ping), do_log_scale_(false) {
     // Vertical field of view is determined by comparing
     // z / sqrt(x^2 + y^2) to tan(elevation_beamwidth/2)
+    if (!ping->ping_info.tx_beamwidths.empty()) {
+      ping->ping_info.tx_beamwidths[0] = 20.0 * M_PI / 180.0;
+    }
     _verticalTanSquared =
         // NOTE(lindzey): The old message assumed a constant elevation
         // beamwidth;
