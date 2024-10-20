@@ -25,7 +25,7 @@ struct SonarImageMsgInterface
       : _ping(boost::make_shared<marine_acoustic_msgs::ProjectedSonarImage>(*ping)), do_log_scale_(false) {
     // Set tx_beamwidths[0] to 20 degrees in radians
     if (!_ping->ping_info.tx_beamwidths.empty()) {
-      _ping->ping_info.tx_beamwidths[0] = 20.0 * M_PI / 180.0;
+      _ping->ping_info.tx_beamwidths.resize(_ping->image.beam_count, 20.0 * M_PI / 180.0);
     }
 
     // Vertical field of view is determined by comparing
