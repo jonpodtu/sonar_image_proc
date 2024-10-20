@@ -7,6 +7,8 @@
 #pragma once
 
 #include <vector>
+#include <cmath> // For M_PI and conversion functions
+#include <boost/make_shared.hpp>
 
 #include "sonar_image_proc/AbstractSonarInterface.h"
 
@@ -176,7 +178,7 @@ struct SonarImageMsgInterface
   }
 
  protected:
-  marine_acoustic_msgs::ProjectedSonarImage::ConstPtr _ping;
+  marine_acoustic_msgs::ProjectedSonarImage::Ptr _ping;
 
   float _verticalTanSquared;
   std::vector<float> _ping_azimuths;
@@ -239,10 +241,4 @@ struct SonarImageMsgInterface
   float min_db_, max_db_, range_db_;
 };
 
-
-private:
-  marine_acoustic_msgs::ProjectedSonarImage::Ptr _ping;
-  bool do_log_scale_;
-  double _verticalTanSquared;
-  std::vector<float> _ping_azimuths;
-}; // namespace sonar_image_proc
+} // namespace sonar_image_proc
