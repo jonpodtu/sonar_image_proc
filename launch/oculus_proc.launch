@@ -1,0 +1,30 @@
+<!-- Launches draw_sonar_node and subscribes to oculus_sonar_message topic -->
+<launch>
+  <!-- Nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen"/>
+
+  <!-- Group for oculus namespace -->
+  <group ns="oculus">
+    <!-- Draw sonar nodelet -->
+    <node pkg="nodelet" type="nodelet" name="draw_sonar"
+          args="load sonar_image_proc/draw_sonar /nodelet_manager"
+          output="screen">
+        <!-- Remap input topic -->
+        <remap from="sonar_image" to="/oculus_sonar_message"/>
+        
+        <!-- Remap output topics -->
+        <remap from="drawn_sonar" to="/oculus/drawn_sonar"/>
+        <remap from="drawn_sonar_rect" to="/oculus/drawn_sonar_rect"/>
+        <remap from="drawn_sonar_osd" to="/oculus/drawn_sonar_osd"/>
+        <remap from="old_drawn_sonar" to="/oculus/old_drawn_sonar"/>
+        <remap from="sonar_image_proc_timing" to="/oculus/sonar_image_proc_timing"/>
+        <remap from="histogram" to="/oculus/histogram"/>
+
+        <!-- Parameters -->
+        <param name="publish_histogram" value="true"/>
+    </node>
+
+    <!-- Histogram drawer node -->
+    <node pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer" output="screen"/>
+  </group>
+</launch>
