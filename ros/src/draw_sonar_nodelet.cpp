@@ -48,13 +48,15 @@ class DrawSonarNodelet : public nodelet::Nodelet {
         _maxRange(0.0),
         _colorMap(new InfernoColorMap)  // Set a reasonable default
   {
-    ;
+    ROS_INFO("DrawSonarNodelet constructor called");
   }
 
   virtual ~DrawSonarNodelet() { ; }
 
  private:
   virtual void onInit() {
+    ROS_INFO("onInit called");
+
     ros::NodeHandle nh = getMTNodeHandle();
     ros::NodeHandle pnh = getMTPrivateNodeHandle();
 
@@ -79,18 +81,24 @@ class DrawSonarNodelet : public nodelet::Nodelet {
         "sonar_image", 10, &DrawSonarNodelet::sonarImageCallback, this);
 
     pub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
+    ROS_INFO("drawn_sonar topic advertised");
     osdPub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar_osd", 10);
+    ROS_INFO("drawn_sonar_osd topic advertised");
     rectPub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar_rect", 10);
+    ROS_INFO("drawn_sonar_rect topic advertised");
 
     if (_publishOldApi)
       oldPub_ = nh.advertise<sensor_msgs::Image>("old_drawn_sonar", 10);
+      ROS_INFO("old_drawn_sonar topic advertised");
 
     if (_publishTiming)
       timingPub_ =
           nh.advertise<std_msgs::String>("sonar_image_proc_timing", 10);
+      ROS_INFO("sonar_image_proc_timing topic advertised");
 
     if (_publishHistogram)
       histogramPub_ = nh.advertise<std_msgs::UInt32MultiArray>("histogram", 10);
+      ROS_INFO("histogram topic advertised");
 
     dyn_cfg_server_.reset(new DynamicReconfigureServer(pnh));
     dyn_cfg_server_->setCallback(std::bind(&DrawSonarNodelet::dynCfgCallback,
@@ -116,6 +124,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     ROS_FATAL_COND(!_colorMap, "Colormap is undefined, this shouldn't happen");
 
     SonarImageMsgInterface interface(msg);
+    ROS_INFO("SonarImageMsgInterface created");
     if (log_scale_) {
       interface.do_log_scale(min_db_, max_db_);
     }
@@ -131,11 +140,14 @@ class DrawSonarNodelet : public nodelet::Nodelet {
 
       cv::Size sz = sonar_image_proc::old_api::calculateImageSize(
           interface, cv::Size(0, 0), pixPerRangeBin, _maxRange);
+      ROS_INFO("Old API image size: %dx%d", sz.width, sz.height);
       cv::Mat mat(sz, CV_8UC3);
       mat = sonar_image_proc::old_api::drawSonar(interface, mat, *_colorMap,
                                                  _maxRange);
+      ROS_INFO("Old API image drawn");
 
       cvBridgeAndPublish(msg, mat, oldPub_);
+      ROS_INFO("Old API image published");
 
       oldApiElapsed = ros::WallTime::now() - begin;
     }
