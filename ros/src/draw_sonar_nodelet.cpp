@@ -152,16 +152,16 @@ class DrawSonarNodelet : public nodelet::Nodelet {
       oldApiElapsed = ros::WallTime::now() - begin;
     }
 
-    if (_publishHistogram) {
-      ros::WallTime begin = ros::WallTime::now();
+    // if (_publishHistogram) {
+    //   ros::WallTime begin = ros::WallTime::now();
 
-      auto histogramOut = UInt32MultiArray();
-      histogramOut.data = HistogramGenerator::Generate(interface);
+    //   auto histogramOut = UInt32MultiArray();
+    //   histogramOut.data = HistogramGenerator::Generate(interface);
 
-      histogramPub_.publish(histogramOut);
+    //   histogramPub_.publish(histogramOut);
 
-      histogramElapsed = ros::WallTime::now() - begin;
-    }
+    //   histogramElapsed = ros::WallTime::now() - begin;
+    // }
 
     {
       ros::WallTime begin = ros::WallTime::now();
