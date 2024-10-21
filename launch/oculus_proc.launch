@@ -1,5 +1,7 @@
 <!-- Launches draw_sonar_node and subscribes to oculus_sonar_message topic -->
 <launch>
+  <!-- Define the argument with a default value -->
+  <arg name="publish_histogram_oculus" default="true" />
   <!-- Nodelet manager -->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen"/>
 
@@ -21,10 +23,10 @@
         <remap from="histogram" to="/oculus/histogram"/>
 
         <!-- Parameters -->
-        <param name="publish_histogram" value="true"/>
+        <param name="publish_histogram" value="$(arg publish_histogram_oculus)"/>
     </node>
 
     <!-- Histogram drawer node -->
-    <node pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer" output="screen"/>
+    <node if="$(arg publish_histogram_oculus)" pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer_oculus" output="screen"/>
   </group>
 </launch>

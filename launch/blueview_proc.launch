@@ -1,5 +1,8 @@
 <!-- Launches draw_sonar_node and subscribes to blueview_sonar_message topic -->
 <launch>
+  <!-- Define the argument with a default value -->
+  <arg name="publish_histogram_blueview" default="false" />
+
   <!-- Nodelet manager -->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen"/>
 
@@ -21,10 +24,10 @@
         <remap from="histogram" to="/blueview/histogram"/>
 
         <!-- Parameters -->
-        <param name="publish_histogram" value="true"/>
+        <param name="publish_histogram" value="$(arg publish_histogram_blueview)"/>
     </node>
 
-    <!-- Histogram drawer node -->
-    <node pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer" output="screen"/>
+    <!-- Histogram drawer node for blueview -->
+    <node if="$(arg publish_histogram_blueview)" pkg="sonar_image_proc" type="histogram_drawer" name="histogram_drawer_blueview" output="screen"/>
   </group>
 </launch>
