@@ -111,12 +111,14 @@ class DrawSonarNodelet : public nodelet::Nodelet {
   void cvBridgeAndPublish(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &msg,
       const cv::Mat &mat, ros::Publisher &pub) {
+    ROS_INFO("cvBridgeAndPublish called");
     cv_bridge::CvImage img_bridge(msg->header,
                                   sensor_msgs::image_encodings::RGB8, mat);
-
+    ROS_INFO("cv_bridge created");
     sensor_msgs::Image output_msg;
     img_bridge.toImageMsg(output_msg);
     pub.publish(output_msg);
+    ROS_INFO("Image published");
   }
 
   void sonarImageCallback(
