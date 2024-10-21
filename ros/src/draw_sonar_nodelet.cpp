@@ -66,7 +66,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     pnh.param<bool>("publish_timing", _publishTiming, true);
 
     pnh.param<bool>("publish_histogram", _publishHistogram, false);
-    ROS_INFO_STREAM("publish_histogram parameter: " << _publishHistogram);
+    _publishHistogram = false; // Overwrite to false
 
     std::string colorMapName;
     pnh.param<string>("color_map", colorMapName, "inferno");
@@ -105,7 +105,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     dyn_cfg_server_->setCallback(std::bind(&DrawSonarNodelet::dynCfgCallback,
                                            this, std::placeholders::_1,
                                            std::placeholders::_2));
-
+    ROS_INFO("Dynamic reconfigure server set up");
     ROS_DEBUG("draw_sonar ready to run...");
   }
 
@@ -153,16 +153,16 @@ class DrawSonarNodelet : public nodelet::Nodelet {
       oldApiElapsed = ros::WallTime::now() - begin;
     }
 
-    // if (_publishHistogram) {
-    //   ros::WallTime begin = ros::WallTime::now();
+    if (_publishHistogram) {
+      ros::WallTime begin = ros::WallTime::now();
 
-    //   auto histogramOut = UInt32MultiArray();
-    //   histogramOut.data = HistogramGenerator::Generate(interface);
+      auto histogramOut = UInt32MultiArray();
+      histogramOut.data = HistogramGenerator::Generate(interface);
 
-    //   histogramPub_.publish(histogramOut);
+      histogramPub_.publish(histogramOut);
 
-    //   histogramElapsed = ros::WallTime::now() - begin;
-    // }
+      histogramElapsed = ros::WallTime::now() - begin;
+    }
 
     {
       ros::WallTime begin = ros::WallTime::now();
