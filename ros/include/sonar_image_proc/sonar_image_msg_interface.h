@@ -7,9 +7,6 @@
 #pragma once
 
 #include <vector>
-#include <cmath> // For M_PI and conversion functions
-#include <boost/make_shared.hpp>
-#include <ros/ros.h> // Include ROS for logging
 
 #include "sonar_image_proc/AbstractSonarInterface.h"
 
@@ -23,9 +20,20 @@ struct SonarImageMsgInterface
     : public sonar_image_proc::AbstractSonarInterface {
   explicit SonarImageMsgInterface(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &ping)
-      : _ping(boost::make_shared<marine_acoustic_msgs::ProjectedSonarImage>(*ping)), do_log_scale_(false) {
-    // We didn't set these settings in the first implementation of blueview, so we set them here manually
-    for (const auto pt : _ping->beam_directions) {
+      : _ping(ping), do_log_scale_(false) {
+    // Vertical field of view is determined by comparing
+    // z / sqrt(x^2 + y^2) to tan(elevation_beamwidth/2)
+    _verticalTanSquared =
+        // NOTE(lindzey): The old message assumed a constant elevation
+        // beamwidth;
+        //     the multibeam people insisted that it be per-beam. For now, this
+        //     assumes that they're all the same.
+        // TODO(lindzey): Look into whether averaging would be better, or if we
+        //     should create an array of verticalTanSquared.
+        // TODO(lindzey): Handle empty-array case.
+        std::pow(std::tan(ping->ping_info.tx_beamwidths[0] / 2.0), 2);
+
+    for (const auto pt : ping->beam_directions) {
       auto az = atan2(-1 * pt.y, pt.z);
       _ping_azimuths.push_back(az);
     }
@@ -79,24 +87,22 @@ struct SonarImageMsgInterface
   }
 
   AbstractSonarInterface::DataType_t data_type() const override {
-    if (_ping->image.dtype == _ping->image.DTYPE_UINT8) {
-      ROS_INFO("Data type selected: UINT8");
+    if (_ping->image.dtype == _ping->image.DTYPE_UINT8)
       return AbstractSonarInterface::TYPE_UINT8;
-    } else if (_ping->image.dtype == _ping->image.DTYPE_UINT16) {
-      ROS_INFO("Data type selected: UINT16");
+    else if (_ping->image.dtype == _ping->image.DTYPE_UINT16)
       return AbstractSonarInterface::TYPE_UINT16;
-    } else if (_ping->image.dtype == _ping->image.DTYPE_UINT32) {
-      ROS_INFO("Data type selected: UINT32");
+    else if (_ping->image.dtype == _ping->image.DTYPE_UINT32)
       return AbstractSonarInterface::TYPE_UINT32;
-    }
 
-    ROS_WARN("Data type selected: NONE");
+    //
     return AbstractSonarInterface::TYPE_NONE;
   }
 
   const std::vector<float> &ranges() const override { return _ping->ranges; }
 
   const std::vector<float> &azimuths() const override { return _ping_azimuths; }
+
+  float verticalTanSquared() const { return _verticalTanSquared; }
 
   // When the underlying data is 8-bit, returns that exact value
   // from the underlying data
@@ -165,7 +171,9 @@ struct SonarImageMsgInterface
   }
 
  protected:
-  marine_acoustic_msgs::ProjectedSonarImage::Ptr _ping;
+  marine_acoustic_msgs::ProjectedSonarImage::ConstPtr _ping;
+
+  float _verticalTanSquared;
   std::vector<float> _ping_azimuths;
 
   size_t index(const AzimuthRangeIndices &idx) const {
@@ -226,4 +234,4 @@ struct SonarImageMsgInterface
   float min_db_, max_db_, range_db_;
 };
 
-} // namespace sonar_image_proc
+}  // namespace sonar_image_proc

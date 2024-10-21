@@ -48,15 +48,13 @@ class DrawSonarNodelet : public nodelet::Nodelet {
         _maxRange(0.0),
         _colorMap(new InfernoColorMap)  // Set a reasonable default
   {
-    ROS_INFO("DrawSonarNodelet constructor called");
+    ;
   }
 
   virtual ~DrawSonarNodelet() { ; }
 
  private:
   virtual void onInit() {
-    ROS_INFO("onInit called");
-
     ros::NodeHandle nh = getMTNodeHandle();
     ros::NodeHandle pnh = getMTPrivateNodeHandle();
 
@@ -81,52 +79,43 @@ class DrawSonarNodelet : public nodelet::Nodelet {
         "sonar_image", 10, &DrawSonarNodelet::sonarImageCallback, this);
 
     pub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
-    ROS_INFO("drawn_sonar topic advertised");
     osdPub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar_osd", 10);
-    ROS_INFO("drawn_sonar_osd topic advertised");
     rectPub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar_rect", 10);
-    ROS_INFO("drawn_sonar_rect topic advertised");
 
-    if (_publishOldApi){
+    if (_publishOldApi)
       oldPub_ = nh.advertise<sensor_msgs::Image>("old_drawn_sonar", 10);
-      ROS_INFO("old_drawn_sonar topic advertised");
-    }
-    if (_publishTiming){
+
+    if (_publishTiming)
       timingPub_ =
           nh.advertise<std_msgs::String>("sonar_image_proc_timing", 10);
-      ROS_INFO("sonar_image_proc_timing topic advertised");
-    }
-    if (_publishHistogram){
+
+    if (_publishHistogram)
       histogramPub_ = nh.advertise<std_msgs::UInt32MultiArray>("histogram", 10);
-      ROS_INFO("histogram topic advertised");
-    }
+
     dyn_cfg_server_.reset(new DynamicReconfigureServer(pnh));
     dyn_cfg_server_->setCallback(std::bind(&DrawSonarNodelet::dynCfgCallback,
                                            this, std::placeholders::_1,
                                            std::placeholders::_2));
-    ROS_INFO("Dynamic reconfigure server set up");
+
     ROS_DEBUG("draw_sonar ready to run...");
   }
 
   void cvBridgeAndPublish(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &msg,
       const cv::Mat &mat, ros::Publisher &pub) {
-    ROS_INFO("cvBridgeAndPublish called");
     cv_bridge::CvImage img_bridge(msg->header,
                                   sensor_msgs::image_encodings::RGB8, mat);
-    ROS_INFO("cv_bridge created");
+
     sensor_msgs::Image output_msg;
     img_bridge.toImageMsg(output_msg);
     pub.publish(output_msg);
-    ROS_INFO("Image published");
   }
 
   void sonarImageCallback(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &msg) {
     ROS_FATAL_COND(!_colorMap, "Colormap is undefined, this shouldn't happen");
-    ROS_INFO("sonarImageCallback called");
+
     SonarImageMsgInterface interface(msg);
-    ROS_INFO("SonarImageMsgInterface created");
     if (log_scale_) {
       interface.do_log_scale(min_db_, max_db_);
     }
@@ -142,14 +131,11 @@ class DrawSonarNodelet : public nodelet::Nodelet {
 
       cv::Size sz = sonar_image_proc::old_api::calculateImageSize(
           interface, cv::Size(0, 0), pixPerRangeBin, _maxRange);
-      ROS_INFO("Old API image size: %dx%d", sz.width, sz.height);
       cv::Mat mat(sz, CV_8UC3);
       mat = sonar_image_proc::old_api::drawSonar(interface, mat, *_colorMap,
                                                  _maxRange);
-      ROS_INFO("Old API image drawn");
 
       cvBridgeAndPublish(msg, mat, oldPub_);
-      ROS_INFO("Old API image published");
 
       oldApiElapsed = ros::WallTime::now() - begin;
     }
@@ -214,7 +200,6 @@ class DrawSonarNodelet : public nodelet::Nodelet {
 
   void dynCfgCallback(sonar_image_proc::DrawSonarConfig &config,
                       uint32_t level) {
-    ROS_INFO("Dynamic reconfigure callback called");
     _sonarDrawer.overlayConfig()
         .setRangeSpacing(config.range_spacing)
         .setRadialSpacing(config.bearing_spacing)
@@ -224,7 +209,6 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     log_scale_ = config.log_scale;
     min_db_ = config.min_db;
     max_db_ = config.max_db;
-    ROS_INFO("Dynamic reconfigure callback finished");
   }
 
   void setColorMap(const std::string &colorMapName) {
