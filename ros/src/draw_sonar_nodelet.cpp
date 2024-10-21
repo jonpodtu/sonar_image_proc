@@ -66,7 +66,6 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     pnh.param<bool>("publish_timing", _publishTiming, true);
 
     pnh.param<bool>("publish_histogram", _publishHistogram, false);
-    _publishHistogram = false; // Overwrite to false
 
     std::string colorMapName;
     pnh.param<string>("color_map", colorMapName, "inferno");
@@ -88,19 +87,19 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     rectPub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar_rect", 10);
     ROS_INFO("drawn_sonar_rect topic advertised");
 
-    if (_publishOldApi)
+    if (_publishOldApi){
       oldPub_ = nh.advertise<sensor_msgs::Image>("old_drawn_sonar", 10);
       ROS_INFO("old_drawn_sonar topic advertised");
-
-    if (_publishTiming)
+    }
+    if (_publishTiming){
       timingPub_ =
           nh.advertise<std_msgs::String>("sonar_image_proc_timing", 10);
       ROS_INFO("sonar_image_proc_timing topic advertised");
-
-    if (_publishHistogram)
+    }
+    if (_publishHistogram){
       histogramPub_ = nh.advertise<std_msgs::UInt32MultiArray>("histogram", 10);
       ROS_INFO("histogram topic advertised");
-
+    }
     dyn_cfg_server_.reset(new DynamicReconfigureServer(pnh));
     dyn_cfg_server_->setCallback(std::bind(&DrawSonarNodelet::dynCfgCallback,
                                            this, std::placeholders::_1,
@@ -213,6 +212,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
 
   void dynCfgCallback(sonar_image_proc::DrawSonarConfig &config,
                       uint32_t level) {
+    ROS_INFO("Dynamic reconfigure callback called");
     _sonarDrawer.overlayConfig()
         .setRangeSpacing(config.range_spacing)
         .setRadialSpacing(config.bearing_spacing)
@@ -222,6 +222,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     log_scale_ = config.log_scale;
     min_db_ = config.min_db;
     max_db_ = config.max_db;
+    ROS_INFO("Dynamic reconfigure callback finished");
   }
 
   void setColorMap(const std::string &colorMapName) {
