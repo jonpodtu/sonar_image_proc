@@ -13,7 +13,7 @@
           args="load sonar_image_proc/draw_sonar /nodelet_manager"
           output="screen">
         <!-- Remap input topic -->
-        <remap from="sonar_image" to="blueview_message_polar"/> <!-- Should be blueview/sonar_image-->
+        <remap from="sonar_image" to="/blueview_message_polar"/> <!-- Should be blueview/sonar_image-->
         
         <!-- Remap output topics -->
         <remap from="drawn_sonar" to="/blueview/drawn_sonar"/>

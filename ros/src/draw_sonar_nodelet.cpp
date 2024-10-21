@@ -124,7 +124,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
   void sonarImageCallback(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &msg) {
     ROS_FATAL_COND(!_colorMap, "Colormap is undefined, this shouldn't happen");
-
+    ROS_INFO("sonarImageCallback called");
     SonarImageMsgInterface interface(msg);
     ROS_INFO("SonarImageMsgInterface created");
     if (log_scale_) {
