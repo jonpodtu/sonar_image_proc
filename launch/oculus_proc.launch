@@ -10,7 +10,7 @@
           args="load sonar_image_proc/draw_sonar /nodelet_manager"
           output="screen">
         <!-- Remap input topic -->
-        <remap from="sonar_image" to="/oculus_sonar_message"/>
+        <remap from="sonar_image" to="/oculus_sonar_message"/> <!-- Should be oculus/sonar_image-->
         
         <!-- Remap output topics -->
         <remap from="drawn_sonar" to="/oculus/drawn_sonar"/>
