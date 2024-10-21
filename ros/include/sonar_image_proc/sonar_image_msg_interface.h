@@ -21,18 +21,6 @@ struct SonarImageMsgInterface
   explicit SonarImageMsgInterface(
       const marine_acoustic_msgs::ProjectedSonarImage::ConstPtr &ping)
       : _ping(ping), do_log_scale_(false) {
-    // Vertical field of view is determined by comparing
-    // z / sqrt(x^2 + y^2) to tan(elevation_beamwidth/2)
-    _verticalTanSquared =
-        // NOTE(lindzey): The old message assumed a constant elevation
-        // beamwidth;
-        //     the multibeam people insisted that it be per-beam. For now, this
-        //     assumes that they're all the same.
-        // TODO(lindzey): Look into whether averaging would be better, or if we
-        //     should create an array of verticalTanSquared.
-        // TODO(lindzey): Handle empty-array case.
-        std::pow(std::tan(ping->ping_info.tx_beamwidths[0] / 2.0), 2);
-
     for (const auto pt : ping->beam_directions) {
       auto az = atan2(-1 * pt.y, pt.z);
       _ping_azimuths.push_back(az);
@@ -102,8 +90,6 @@ struct SonarImageMsgInterface
 
   const std::vector<float> &azimuths() const override { return _ping_azimuths; }
 
-  float verticalTanSquared() const { return _verticalTanSquared; }
-
   // When the underlying data is 8-bit, returns that exact value
   // from the underlying data
   //
@@ -172,8 +158,7 @@ struct SonarImageMsgInterface
 
  protected:
   marine_acoustic_msgs::ProjectedSonarImage::ConstPtr _ping;
-
-  float _verticalTanSquared;
+  
   std::vector<float> _ping_azimuths;
 
   size_t index(const AzimuthRangeIndices &idx) const {

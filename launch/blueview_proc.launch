@@ -1,7 +1,7 @@
 <!-- Launches draw_sonar_node and subscribes to blueview_sonar_message topic -->
 <launch>
   <!-- Define the argument with a default value -->
-  <arg name="publish_histogram_blueview" default="false" />
+  <arg name="publish_histogram_blueview" default="true" />
 
   <!-- Nodelet manager -->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen"/>
