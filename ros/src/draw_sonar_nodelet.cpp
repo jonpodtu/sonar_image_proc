@@ -66,6 +66,7 @@ class DrawSonarNodelet : public nodelet::Nodelet {
     pnh.param<bool>("publish_timing", _publishTiming, true);
 
     pnh.param<bool>("publish_histogram", _publishHistogram, false);
+    ROS_INFO_STREAM("publish_histogram parameter: " << _publishHistogram);
 
     std::string colorMapName;
     pnh.param<string>("color_map", colorMapName, "inferno");

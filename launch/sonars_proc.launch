@@ -1,7 +1,7 @@
 <!-- Launches both oculus and blueview draw_sonar nodes -->
 <launch>
   <!-- Define the argument with a default value -->
-  <arg name="publish_histogram_oculus" default="true" />
+  <arg name="publish_histogram_oculus" default="false" />
   <arg name="publish_histogram_blueview" default="false" />
 
   <!-- Nodelet manager -->
